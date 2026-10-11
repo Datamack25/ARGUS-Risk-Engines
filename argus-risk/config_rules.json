@@ -1,0 +1,884 @@
+{
+  "version": 0,
+  "updated_at": null,
+  "updated_by": null,
+  "reason": "Configuration par défaut",
+  "thresholds": {
+    "n1": 40,
+    "n2": 70,
+    "cap": 100,
+    "diversity_bonus": 5
+  },
+  "exclusions": [
+    "REJET",
+    "RESTITUTION",
+    "MAINLEVEE",
+    "TVA",
+    "COMMISSION",
+    "FRAIS",
+    "TCION",
+    "AGIOS",
+    "TAXE",
+    "AJUSTEMENT"
+  ],
+  "lists": {
+    "high_risk": {
+      "KP": "Corée du Nord",
+      "IR": "Iran",
+      "MM": "Myanmar",
+      "DZ": "Algérie",
+      "AO": "Angola",
+      "BO": "Bolivie",
+      "BG": "Bulgarie",
+      "BF": "Burkina Faso",
+      "CM": "Cameroun",
+      "CI": "Côte d'Ivoire",
+      "CD": "RD Congo",
+      "HT": "Haïti",
+      "KE": "Kenya",
+      "LA": "Laos",
+      "LB": "Liban",
+      "MC": "Monaco",
+      "MZ": "Mozambique",
+      "NA": "Namibie",
+      "NP": "Népal",
+      "NG": "Nigéria",
+      "ZA": "Afrique du Sud",
+      "SS": "Soudan du Sud",
+      "SY": "Syrie",
+      "VE": "Venezuela",
+      "VN": "Vietnam",
+      "VG": "Îles Vierges britanniques",
+      "YE": "Yémen"
+    },
+    "tax_havens": {
+      "KY": "Îles Caïmans",
+      "VG": "Îles Vierges britanniques",
+      "BS": "Bahamas",
+      "BZ": "Belize",
+      "PA": "Panama",
+      "SC": "Seychelles",
+      "VU": "Vanuatu",
+      "BM": "Bermudes",
+      "AI": "Anguilla",
+      "TC": "Îles Turques-et-Caïques",
+      "WS": "Samoa",
+      "MH": "Îles Marshall",
+      "AG": "Antigua-et-Barbuda"
+    },
+    "sepa": [
+      "AD",
+      "AT",
+      "BE",
+      "BG",
+      "BL",
+      "CH",
+      "CY",
+      "CZ",
+      "DE",
+      "DK",
+      "EE",
+      "ES",
+      "FI",
+      "FR",
+      "GB",
+      "GF",
+      "GP",
+      "GR",
+      "HR",
+      "HU",
+      "IE",
+      "IS",
+      "IT",
+      "LI",
+      "LT",
+      "LU",
+      "LV",
+      "MC",
+      "MF",
+      "MQ",
+      "MT",
+      "NL",
+      "NO",
+      "PL",
+      "PM",
+      "PT",
+      "RE",
+      "RO",
+      "SE",
+      "SI",
+      "SK",
+      "SM",
+      "VA",
+      "YT"
+    ],
+    "kyc_failed": [
+      "ECHEC",
+      "ECHOUE",
+      "EXPIRE",
+      "EXPIRED",
+      "FAILED",
+      "INCOMPLET",
+      "INVALID",
+      "INVALIDE",
+      "KO",
+      "NONVERIFIE",
+      "REFUSE",
+      "REJECTED",
+      "REJETE",
+      "SUSPENDU"
+    ],
+    "reviewed": "À renseigner (liste de travail à valider avant usage en production)"
+  },
+  "typologies": {
+    "LCB-01": {
+      "enabled": true,
+      "weight": 35,
+      "name": "Passage rapide de fonds (pass-through)",
+      "signal": "Crédit important suivi d'un débit quasi équivalent en moins de 48 h.",
+      "params": {
+        "window_h": 48,
+        "min_amount": 3000,
+        "ratio": 0.85
+      }
+    },
+    "LCB-02": {
+      "enabled": true,
+      "weight": 35,
+      "name": "Société éphémère / « lessiveuse »",
+      "signal": "Structure récente (< 90 jours) au volume élevé dont les sorties reprennent ≥ 90 % des entrées.",
+      "params": {
+        "max_days": 90,
+        "min_ops": 8,
+        "min_volume": 20000,
+        "ratio": 0.9
+      }
+    },
+    "LCB-03": {
+      "enabled": true,
+      "weight": 30,
+      "name": "Compte de collecte (nombreux donneurs d'ordre)",
+      "signal": "8 contreparties distinctes ou plus créditent le même compte en 7 jours.",
+      "params": {
+        "min_counterparties": 8,
+        "window_h": 168
+      }
+    },
+    "LCB-04": {
+      "enabled": true,
+      "weight": 25,
+      "name": "Dispersion rapide de fonds (nombreux bénéficiaires)",
+      "signal": "8 bénéficiaires distincts ou plus en 7 jours.",
+      "params": {
+        "min_counterparties": 8,
+        "window_h": 168
+      }
+    },
+    "LCB-05": {
+      "enabled": true,
+      "weight": 20,
+      "name": "Multi-virements rapides",
+      "signal": "5 virements émis ou plus en 24 h.",
+      "params": {
+        "min_count": 5,
+        "window_h": 24,
+        "direction": "out",
+        "methods": [
+          "VIR_SEPA",
+          "VIR_INST",
+          "VIREMENT",
+          "VIR"
+        ]
+      }
+    },
+    "LCB-06": {
+      "enabled": true,
+      "weight": 25,
+      "name": "Flux croisés / allers-retours",
+      "signal": "Allers-retours répétés avec une même contrepartie sans justification économique.",
+      "params": {
+        "min_count": 4
+      }
+    },
+    "LCB-07": {
+      "enabled": true,
+      "weight": 25,
+      "name": "Réactivation d'un compte dormant",
+      "signal": "Opération ≥ 5 000 € après 180 jours sans activité.",
+      "params": {
+        "dormant_days": 180,
+        "min_amount": 5000
+      }
+    },
+    "LCB-08": {
+      "enabled": true,
+      "weight": 20,
+      "name": "Opération immobilière atypique",
+      "signal": "Flux ≥ 50 000 € libellé acquisition, notaire, SCI ou immobilier.",
+      "params": {
+        "keywords": [
+          "NOTAIRE",
+          "IMMOBILIER",
+          "ACQUISITION",
+          "SCI",
+          "COMPROMIS"
+        ],
+        "min_amount": 50000
+      }
+    },
+    "LCB-09": {
+      "enabled": true,
+      "weight": 20,
+      "name": "Structures opaques (trust, holding, offshore)",
+      "signal": "Opération impliquant un trust, une fondation, une holding, un nominee ou une structure offshore.",
+      "params": {
+        "keywords": [
+          "TRUST",
+          "FONDATION",
+          "OFFSHORE",
+          "NOMINEE",
+          "SPV",
+          "FIDUCIAIRE",
+          "HOLDING"
+        ]
+      }
+    },
+    "LCB-10": {
+      "enabled": true,
+      "weight": 15,
+      "name": "Exposition aux cryptoactifs",
+      "signal": "Flux ≥ 1 000 € vers ou depuis une plateforme de cryptoactifs.",
+      "params": {
+        "keywords": [
+          "CRYPTO",
+          "BITCOIN",
+          "BINANCE",
+          "COINBASE",
+          "USDT",
+          "KRAKEN"
+        ],
+        "min_amount": 1000
+      }
+    },
+    "LCB-11": {
+      "enabled": true,
+      "weight": 20,
+      "name": "Opération unitaire atypique",
+      "signal": "Opération unitaire ≥ 50 000 €.",
+      "params": {
+        "threshold": 50000
+      }
+    },
+    "LCB-12": {
+      "enabled": true,
+      "weight": 15,
+      "name": "Rupture d'habitude (montant)",
+      "signal": "Montant supérieur à 5 fois le montant médian du client (≥ 5 opérations d'historique).",
+      "params": {
+        "factor": 5,
+        "min_tx": 5,
+        "min_amount": 1000
+      }
+    },
+    "LCB-13": {
+      "enabled": true,
+      "weight": 20,
+      "name": "Multiplicité de pays en peu de temps",
+      "signal": "4 pays distincts ou plus en 7 jours.",
+      "params": {
+        "min_countries": 4,
+        "window_h": 168
+      }
+    },
+    "FRA-01": {
+      "enabled": true,
+      "weight": 25,
+      "name": "Fractionnement d'espèces sous 10 000 €",
+      "signal": "3 opérations d'espèces ou plus entre 80 % et 100 % du seuil de 10 000 € en 7 jours.",
+      "params": {
+        "threshold": 10000,
+        "band_low": 0.8,
+        "min_count": 3,
+        "window_h": 168,
+        "methods": [
+          "CASH",
+          "ESPECES",
+          "ESPECE",
+          "LIQUIDE"
+        ]
+      }
+    },
+    "FRA-02": {
+      "enabled": true,
+      "weight": 20,
+      "name": "Fractionnement sous le seuil de 3 000 €",
+      "signal": "4 opérations ou plus juste sous 3 000 € en 72 h.",
+      "params": {
+        "threshold": 3000,
+        "band_low": 0.85,
+        "min_count": 4,
+        "window_h": 72
+      }
+    },
+    "FRA-03": {
+      "enabled": true,
+      "weight": 15,
+      "name": "Montants identiques répétés",
+      "signal": "4 opérations identiques de plus de 500 € en 30 jours.",
+      "params": {
+        "min_amount": 500,
+        "min_count": 4,
+        "window_h": 720
+      }
+    },
+    "FRA-04": {
+      "enabled": true,
+      "weight": 15,
+      "name": "Concentration de montants ronds",
+      "signal": "Montants ronds élevés répétés (≥ 5 000 €, multiples de 1 000 €).",
+      "params": {
+        "min_amount": 5000,
+        "modulo": 1000,
+        "min_count": 2,
+        "window_h": 720
+      }
+    },
+    "FRA-05": {
+      "enabled": true,
+      "weight": 30,
+      "name": "Espèces cumulées atypiques",
+      "signal": "Flux d'espèces cumulés ≥ 8 000 € sur 30 jours.",
+      "params": {
+        "threshold": 8000,
+        "window_h": 720,
+        "methods": [
+          "CASH",
+          "ESPECES",
+          "ESPECE",
+          "LIQUIDE"
+        ]
+      }
+    },
+    "SAN-01": {
+      "enabled": true,
+      "weight": 50,
+      "name": "Correspondance PPE / sanctions",
+      "signal": "Lien détecté avec une liste de sanctions ou une personne exposée politiquement.",
+      "params": {}
+    },
+    "SAN-02": {
+      "enabled": true,
+      "weight": 30,
+      "name": "Flux liés à une juridiction à haut risque",
+      "signal": "Opération avec un pays figurant dans la liste de surveillance.",
+      "params": {}
+    },
+    "SAN-03": {
+      "enabled": true,
+      "weight": 15,
+      "name": "Paiements hors zone SEPA",
+      "signal": "Opération avec un pays hors SEPA.",
+      "params": {}
+    },
+    "SAN-04": {
+      "enabled": true,
+      "weight": 35,
+      "name": "Petits transferts répétés vers zones à risque (FT)",
+      "signal": "3 transferts de moins de 1 000 € ou plus vers une juridiction à risque en 30 jours.",
+      "params": {
+        "max_amount": 1000,
+        "min_count": 3,
+        "window_h": 720
+      }
+    },
+    "FIS-01": {
+      "enabled": true,
+      "weight": 25,
+      "name": "Flux vers territoires à fiscalité privilégiée",
+      "signal": "Opération avec un centre offshore ou un territoire à fiscalité privilégiée.",
+      "params": {}
+    },
+    "FIS-02": {
+      "enabled": true,
+      "weight": 20,
+      "name": "Dépôts d'espèces récurrents (revenus non déclarés)",
+      "signal": "6 dépôts d'espèces ou plus en 30 jours.",
+      "params": {
+        "min_count": 6,
+        "window_h": 720,
+        "direction": "in",
+        "methods": [
+          "CASH",
+          "ESPECES",
+          "ESPECE",
+          "LIQUIDE"
+        ]
+      }
+    },
+    "FIS-03": {
+      "enabled": true,
+      "weight": 25,
+      "name": "Facturation circulaire (montants miroirs)",
+      "signal": "Mêmes montants reçus puis restitués (≥ 4 opérations, ≥ 1 000 €) en 7 jours.",
+      "params": {
+        "min_amount": 1000,
+        "min_count": 4,
+        "window_h": 168
+      }
+    },
+    "FIS-04": {
+      "enabled": true,
+      "weight": 20,
+      "name": "Incohérence de résidence fiscale",
+      "signal": "3 opérations ≥ 1 000 € ou plus dans un pays autre que la résidence déclarée.",
+      "params": {
+        "min_amount": 1000,
+        "min_count": 3
+      }
+    },
+    "FIS-05": {
+      "enabled": true,
+      "weight": 20,
+      "name": "Prélèvements atypiques du dirigeant (abus de biens sociaux)",
+      "signal": "3 sorties ou plus libellées compte courant d'associé, dirigeant ou prélèvement personnel en 90 jours.",
+      "params": {
+        "keywords": [
+          "COMPTECOURANT",
+          "ASSOCIE",
+          "DIRIGEANT",
+          "PRELEVEMENTPERSONNEL"
+        ],
+        "min_count": 3,
+        "window_h": 2160,
+        "direction": "out"
+      }
+    },
+    "FIS-06": {
+      "enabled": true,
+      "weight": 30,
+      "name": "Fraude aux aides publiques (CPF, rénovation, chômage partiel)",
+      "signal": "Aide publique reçue puis reversée à ≥ 90 % en 7 jours.",
+      "params": {
+        "window_h": 168,
+        "min_amount": 1000,
+        "ratio": 0.9,
+        "credit_keywords": [
+          "CPF",
+          "MONCOMPTEFORMATION",
+          "CAISSEDESDEPOTS",
+          "PRIMERENOV",
+          "CHOMAGEPARTIEL",
+          "SUBVENTION",
+          "FRANCETRAVAIL",
+          "POLEEMPLOI"
+        ]
+      }
+    },
+    "TRA-01": {
+      "enabled": true,
+      "weight": 25,
+      "name": "Salaires versés en espèces",
+      "signal": "3 paiements de salaire ou de main-d'œuvre en espèces ou plus en 30 jours.",
+      "params": {
+        "keywords": [
+          "SALAIRE",
+          "PAIEOUVRIER",
+          "PAIESALARIE",
+          "MAINDOEUVRE",
+          "OUVRIER",
+          "REMUNERATION"
+        ],
+        "min_count": 3,
+        "window_h": 720,
+        "direction": "out",
+        "methods": [
+          "CASH",
+          "ESPECES",
+          "ESPECE",
+          "LIQUIDE"
+        ]
+      }
+    },
+    "TRA-02": {
+      "enabled": true,
+      "weight": 25,
+      "name": "Paie informelle (virements modestes à nombreux bénéficiaires)",
+      "signal": "6 bénéficiaires distincts ou plus reçoivent chacun moins de 1 500 € en 30 jours.",
+      "params": {
+        "min_counterparties": 6,
+        "window_h": 720,
+        "max_amount": 1500
+      }
+    },
+    "TRA-03": {
+      "enabled": true,
+      "weight": 30,
+      "name": "Salaires sans cotisations sociales",
+      "signal": "Salaires versés sans aucun règlement URSSAF/DSN/cotisations dans le fichier.",
+      "params": {
+        "keywords": [
+          "SALAIRE",
+          "PAIEOUVRIER",
+          "PAIESALARIE",
+          "OUVRIER"
+        ],
+        "absent_keywords": [
+          "URSSAF",
+          "COTISATION",
+          "DSN",
+          "CAISSERETRAITE",
+          "MSA"
+        ],
+        "min_count": 3,
+        "direction": "out"
+      }
+    },
+    "TRA-04": {
+      "enabled": true,
+      "weight": 20,
+      "name": "Retraits d'espèces importants (paie informelle)",
+      "signal": "Retraits d'espèces cumulés ≥ 3 000 € en 7 jours.",
+      "params": {
+        "threshold": 3000,
+        "window_h": 168,
+        "methods": [
+          "CASH",
+          "ESPECES",
+          "ESPECE",
+          "LIQUIDE"
+        ],
+        "direction": "out"
+      }
+    },
+    "FRD-01": {
+      "enabled": true,
+      "weight": 30,
+      "name": "Test de cartes (micro-paiements)",
+      "signal": "5 opérations de moins de 10 € ou plus en 2 h.",
+      "params": {
+        "max_amount": 10,
+        "min_count": 5,
+        "window_h": 2
+      }
+    },
+    "FRD-02": {
+      "enabled": true,
+      "weight": 30,
+      "name": "Chargeback / impayé / contestation",
+      "signal": "Paiements suivis d'impayés, de contestations ou de chargebacks.",
+      "params": {}
+    },
+    "FRD-03": {
+      "enabled": true,
+      "weight": 25,
+      "name": "Multi-comptes sur une même adresse IP",
+      "signal": "3 comptes distincts ou plus depuis la même adresse IP.",
+      "params": {
+        "min_accounts": 3
+      }
+    },
+    "FRD-04": {
+      "enabled": true,
+      "weight": 25,
+      "name": "Multi-cartes sur un même compte",
+      "signal": "4 BIN de cartes différents ou plus alimentant un même compte.",
+      "params": {
+        "min_bins": 4
+      }
+    },
+    "FRD-05": {
+      "enabled": true,
+      "weight": 35,
+      "name": "Paiement vers un compte de tiers",
+      "signal": "Titulaire du compte bénéficiaire différent du client.",
+      "params": {
+        "direction": "out"
+      }
+    },
+    "FRD-06": {
+      "enabled": true,
+      "weight": 25,
+      "name": "Défaillance KYC / anomalie documentaire",
+      "signal": "Dossier client incomplet, expiré, rejeté ou document invalide.",
+      "params": {}
+    },
+    "FRD-07": {
+      "enabled": true,
+      "weight": 30,
+      "name": "Nouveau bénéficiaire important (fraude au président)",
+      "signal": "Premier virement ≥ 10 000 € vers un nouveau bénéficiaire, sur un compte à l'historique établi.",
+      "params": {
+        "min_amount": 10000,
+        "min_history": 5
+      }
+    },
+    "FRD-08": {
+      "enabled": true,
+      "weight": 10,
+      "name": "Pics d'activité nocturne",
+      "signal": "3 opérations ≥ 500 € ou plus entre 02h00 et 05h00 sur 24 h.",
+      "params": {
+        "start": 2,
+        "end": 5,
+        "min_amount": 500,
+        "min_count": 3,
+        "window_h": 24
+      }
+    },
+    "FRD-09": {
+      "enabled": true,
+      "weight": 15,
+      "name": "Remises de chèques répétées",
+      "signal": "5 remises de chèques ou plus en 7 jours.",
+      "params": {
+        "keywords": [
+          "REMISECHEQUE",
+          "REMISECHQ",
+          "CHQ"
+        ],
+        "min_count": 5,
+        "window_h": 168,
+        "direction": "in"
+      }
+    },
+    "FRD-10": {
+      "enabled": true,
+      "weight": 95,
+      "name": "Usurpation d'entité publique / faux RIB",
+      "signal": "Libellé ou contrepartie citant une administration (URSSAF, DGFiP…) mais IBAN d'un autre pays ou d'une juridiction à risque.",
+      "params": {}
+    },
+    "SEC-01": {
+      "enabled": true,
+      "weight": 20,
+      "name": "Jeux : recharges compulsives (chasse aux pertes)",
+      "signal": "5 recharges ou plus en moins de 2 h.",
+      "params": {
+        "min_count": 5,
+        "window_h": 2,
+        "direction": "in"
+      }
+    },
+    "SEC-02": {
+      "enabled": true,
+      "weight": 40,
+      "name": "Jeux : joueur inscrit au fichier des interdits",
+      "signal": "Client présent au fichier national des interdits de jeux.",
+      "params": {}
+    },
+    "SEC-03": {
+      "enabled": true,
+      "weight": 15,
+      "name": "Jeux : abus de bonus",
+      "signal": "Retrait rapide après crédit de bonus ou de promotion.",
+      "params": {
+        "window_h": 72,
+        "min_amount": 20,
+        "ratio": 0.5,
+        "credit_keywords": [
+          "BONUS",
+          "PROMO",
+          "FREEBET"
+        ]
+      }
+    },
+    "SEC-04": {
+      "enabled": true,
+      "weight": 30,
+      "name": "Assurance : rachat ou résiliation anticipés",
+      "signal": "Rachat, résiliation ou renonciation dans les 90 jours suivant la souscription.",
+      "params": {
+        "keywords": [
+          "RACHAT",
+          "RESILIATION",
+          "RENONCIATION"
+        ],
+        "early_days": 90
+      }
+    },
+    "SEC-05": {
+      "enabled": true,
+      "weight": 20,
+      "name": "Assurance : sinistres répétés",
+      "signal": "3 sinistres ou indemnisations ou plus en 12 mois.",
+      "params": {
+        "keywords": [
+          "SINISTRE",
+          "INDEMNISATION"
+        ],
+        "min_count": 3,
+        "window_h": 8760
+      }
+    }
+  },
+  "custom_typologies": [],
+  "whitelist": [],
+  "window_n": 5,
+  "whitelist_rules": {
+    "mode": "OR",
+    "labels": [
+      "LOYER",
+      "IMPOT",
+      "TAXE FONCIERE",
+      "ASSURANCE HABITATION",
+      "ABONNEMENT",
+      "MUTUELLE"
+    ],
+    "counterparties": [],
+    "ibans": []
+  },
+  "public_entities": [
+    {
+      "name": "DGFiP / Trésor public / Impôts",
+      "keywords": [
+        "DGFIP",
+        "DGFP",
+        "TRESOR PUBLIC",
+        "SERVICE DES IMPOTS",
+        "SIE"
+      ],
+      "country": "FR"
+    },
+    {
+      "name": "Douanes",
+      "keywords": [
+        "DOUANE",
+        "DOUANES",
+        "DGDDI"
+      ],
+      "country": "FR"
+    },
+    {
+      "name": "Caisse des dépôts",
+      "keywords": [
+        "CAISSE DES DEPOTS"
+      ],
+      "country": "FR"
+    },
+    {
+      "name": "Bpifrance",
+      "keywords": [
+        "BPIFRANCE",
+        "BPI FRANCE"
+      ],
+      "country": "FR"
+    },
+    {
+      "name": "URSSAF / ACOSS",
+      "keywords": [
+        "URSSAF",
+        "ACOSS"
+      ],
+      "country": "FR"
+    },
+    {
+      "name": "Assurance maladie / retraite / famille",
+      "keywords": [
+        "CPAM",
+        "CARSAT",
+        "CAF",
+        "MSA"
+      ],
+      "country": "FR"
+    },
+    {
+      "name": "France Travail (ex-Pôle emploi)",
+      "keywords": [
+        "FRANCE TRAVAIL",
+        "POLE EMPLOI",
+        "POLEEMPLOI"
+      ],
+      "country": "FR"
+    },
+    {
+      "name": "OPCO",
+      "keywords": [
+        "OPCO"
+      ],
+      "country": "FR"
+    },
+    {
+      "name": "Collectivités territoriales",
+      "keywords": [
+        "MAIRIE",
+        "CONSEIL REGIONAL",
+        "CONSEIL DEPARTEMENTAL",
+        "METROPOLE"
+      ],
+      "country": "FR"
+    },
+    {
+      "name": "Établissements de santé publics",
+      "keywords": [
+        "CENTRE HOSPITALIER",
+        "CHU",
+        "HOPITAL"
+      ],
+      "country": "FR"
+    },
+    {
+      "name": "Justice",
+      "keywords": [
+        "TRIBUNAL DE COMMERCE",
+        "GREFFE"
+      ],
+      "country": "FR"
+    },
+    {
+      "name": "Régulateurs",
+      "keywords": [
+        "AMF",
+        "ACPR",
+        "CNIL"
+      ],
+      "country": "FR"
+    },
+    {
+      "name": "Commission européenne",
+      "keywords": [
+        "COMMISSION EUROPEENNE"
+      ],
+      "country": "BE"
+    },
+    {
+      "name": "Banque centrale européenne",
+      "keywords": [
+        "BCE",
+        "BANQUE CENTRALE EUROPEENNE"
+      ],
+      "country": "DE"
+    },
+    {
+      "name": "ONU",
+      "keywords": [
+        "ONU",
+        "NATIONS UNIES"
+      ],
+      "country": "US"
+    },
+    {
+      "name": "IRS (États-Unis)",
+      "keywords": [
+        "IRS"
+      ],
+      "country": "US"
+    },
+    {
+      "name": "HMRC (Royaume-Uni)",
+      "keywords": [
+        "HMRC"
+      ],
+      "country": "GB"
+    }
+  ],
+  "fx_rates": {},
+  "header_synonyms": {},
+  "context": {
+    "bonus_high": 10,
+    "bonus_critical": 20,
+    "kyc_volume_factor": 2.0
+  },
+  "learning": {
+    "enabled": true
+  }
+}

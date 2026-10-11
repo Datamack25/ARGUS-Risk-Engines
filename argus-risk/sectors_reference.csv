@@ -1,0 +1,17 @@
+Sector_Code,Sector_Name,Risk_Level
+BANQ,Banque / services financiers,Moyen
+ASSU,Assurance,Moyen
+JEUX,Jeux d'argent en ligne,Élevé
+PAIE,Établissement de paiement / FinTech,Moyen
+CRYP,Crypto-actifs / PSAN,Critique
+IMMO,Immobilier,Élevé
+BTP,BTP / construction,Élevé
+RESTO,Restauration / HCR,Moyen
+NEGOCE,Négoce de métaux et pierres précieuses,Critique
+ART,Art et antiquités,Élevé
+TRANSP,Transport / logistique,Moyen
+COMM,Commerce de détail,Faible
+SANTE,Santé,Faible
+ASSO,Associations / fondations,Moyen
+CONSEIL,Conseil / services aux entreprises,Moyen
+PUBLIC,Administration publique,Faible
